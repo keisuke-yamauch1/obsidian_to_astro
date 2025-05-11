@@ -14,6 +14,53 @@ fs.ensureDirSync(path.join(outputContentPath, 'blog'));
 fs.ensureDirSync(path.join(outputContentPath, 'diary'));
 fs.ensureDirSync(outputImagesPath);
 
+// Function to process tags in frontmatter to remove "astro_blog/" prefix
+function processTagsInFrontmatter(frontmatter) {
+  // Check if frontmatter contains tags
+  if (!frontmatter.includes('tags:')) {
+    return frontmatter;
+  }
+
+  let processedFrontmatter = frontmatter;
+
+  // Process tags in array format (multi-line)
+  // Example:
+  // tags:
+  //   - astro_blog/tag1
+  //   - astro_blog/tag2
+  if (frontmatter.match(/tags:\s*\n\s+- /)) {
+    // Split the frontmatter into lines
+    const lines = processedFrontmatter.split('\n');
+    // Process each line
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].match(/\s+- astro_blog\//)) {
+        lines[i] = lines[i].replace(/(\s+- )astro_blog\//, '$1');
+      }
+    }
+    // Join the lines back together
+    processedFrontmatter = lines.join('\n');
+  } else {
+    // Process tags in array format (single-line)
+    // Example: tags: [astro_blog/tag1, astro_blog/tag2]
+    processedFrontmatter = processedFrontmatter.replace(/tags:\s*\[(.*?)\]/g, (match, tagList) => {
+      const processedTagList = tagList.replace(/astro_blog\//g, '');
+      return `tags: [${processedTagList}]`;
+    });
+
+    // Process tags in string format
+    // Example: tags: astro_blog/tag1, astro_blog/tag2
+    processedFrontmatter = processedFrontmatter.replace(/tags:\s*(.*?)(?=\n|$)/g, (match, tagList) => {
+      if (!tagList.includes('[') && !tagList.includes(']')) {
+        const processedTagList = tagList.replace(/astro_blog\//g, '');
+        return `tags: ${processedTagList}`;
+      }
+      return match;
+    });
+  }
+
+  return processedFrontmatter;
+}
+
 // Function to copy files
 // Function to process markdown content and convert Obsidian image syntax to Astro image syntax
 // Also adds a description based on the first 70 characters of the content (for blog entries only)
@@ -48,8 +95,11 @@ function processMarkdownContent(content, addDescription = true) {
       // Add description to existing frontmatter
       const secondDashIndex = content.indexOf('---', 3);
       if (secondDashIndex !== -1) {
-        const frontmatter = content.substring(0, secondDashIndex);
+        let frontmatter = content.substring(0, secondDashIndex);
         const restContent = content.substring(secondDashIndex);
+
+        // Process tags in frontmatter to remove "astro_blog/" prefix
+        frontmatter = processTagsInFrontmatter(frontmatter);
 
         // Check if description already exists in frontmatter
         if (frontmatter.includes('description:')) {
@@ -65,6 +115,19 @@ function processMarkdownContent(content, addDescription = true) {
     } else {
       // Add new frontmatter with description
       content = `---\ndescription: "${description}"\n---\n\n${content}`;
+    }
+  }
+
+  // Process tags in frontmatter even if addDescription is false
+  if (!addDescription && content.startsWith('---')) {
+    const secondDashIndex = content.indexOf('---', 3);
+    if (secondDashIndex !== -1) {
+      const frontmatter = content.substring(0, secondDashIndex);
+      const restContent = content.substring(secondDashIndex);
+
+      // Process tags in frontmatter to remove "astro_blog/" prefix
+      const processedFrontmatter = processTagsInFrontmatter(frontmatter);
+      content = processedFrontmatter + restContent;
     }
   }
 
