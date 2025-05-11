@@ -16,7 +16,58 @@ fs.ensureDirSync(outputImagesPath);
 
 // Function to copy files
 // Function to process markdown content and convert Obsidian image syntax to Astro image syntax
-function processMarkdownContent(content) {
+// Also adds a description based on the first 70 characters of the content (for blog entries only)
+function processMarkdownContent(content, addDescription = true) {
+  if (addDescription) {
+    // Generate description from the first 70 characters of the content
+    // Remove any YAML frontmatter if present
+    let contentWithoutFrontmatter = content;
+    if (content.startsWith('---')) {
+      const secondDashIndex = content.indexOf('---', 3);
+      if (secondDashIndex !== -1) {
+        contentWithoutFrontmatter = content.substring(secondDashIndex + 3);
+      }
+    }
+
+    // Convert line breaks to spaces and get plain text
+    // Also remove common Markdown syntax to ensure it's plain text
+    const plainText = contentWithoutFrontmatter
+      .replace(/\n/g, ' ')  // Replace newlines with spaces
+      .replace(/\r/g, '')   // Remove carriage returns
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Keep link text, remove only URL
+      .replace(/[*_~`#>]+/g, '')      // Remove formatting characters
+      .replace(/!\[\[.*?\]\]/g, '')   // Remove Obsidian image syntax
+      .replace(/!\[.*?\]\(.*?\)/g, '') // Remove standard image syntax
+      .replace(/\s+/g, ' ');          // Normalize spaces
+
+    // Get first 70 characters and add ellipsis
+    const description = plainText.trim().substring(0, 70) + '...';
+
+    // Check if content already has frontmatter
+    if (content.startsWith('---')) {
+      // Add description to existing frontmatter
+      const secondDashIndex = content.indexOf('---', 3);
+      if (secondDashIndex !== -1) {
+        const frontmatter = content.substring(0, secondDashIndex);
+        const restContent = content.substring(secondDashIndex);
+
+        // Check if description already exists in frontmatter
+        if (frontmatter.includes('description:')) {
+          // Replace existing description
+          const updatedFrontmatter = frontmatter.replace(/description:.*$/m, `description: ${description}`);
+          content = updatedFrontmatter + restContent;
+        } else {
+          // Add description to frontmatter
+          const updatedFrontmatter = frontmatter + `description: "${description}"\n`;
+          content = updatedFrontmatter + restContent;
+        }
+      }
+    } else {
+      // Add new frontmatter with description
+      content = `---\ndescription: "${description}"\n---\n\n${content}`;
+    }
+  }
+
   // Replace ![[filename]] with ![Image](../../assets/filename)
   return content.replace(/!\[\[(.*?)\]\]/g, '![Image](../../assets/$1)');
 }
@@ -61,8 +112,8 @@ async function copyFiles() {
         const destPath = path.join(outputContentPath, 'diary', file);
         // Read the file content
         const content = await fs.readFile(path.join(diaryPath, file), 'utf8');
-        // Process the content
-        const processedContent = processMarkdownContent(content);
+        // Process the content (don't add description for diary entries)
+        const processedContent = processMarkdownContent(content, false);
         // Write the processed content to the destination
         await fs.writeFile(destPath, processedContent);
         console.log(`Copied and processed ${file} to ${path.join(outputContentPath, 'diary')}`);
