@@ -139,6 +139,13 @@ function processMarkdownContent(content, addDescription = true) {
     return `[${title}](/diary/${year}/${month}/${day})`;
   });
 
+  // Transform [[00001_ブログタイトル]] to [ブログタイトル](/blog/1)
+  processedContent = processedContent.replace(/\[\[(\d{5})_(.*?)\]\]/g, (match, number, title) => {
+    // Remove leading zeros from the number
+    const nonZeroPaddedNumber = parseInt(number, 10);
+    return `[${title}](/blog/${nonZeroPaddedNumber})`;
+  });
+
   return processedContent;
 }
 
