@@ -132,7 +132,14 @@ function processMarkdownContent(content, addDescription = true) {
   }
 
   // Replace ![[filename]] with ![Image](../../assets/filename)
-  return content.replace(/!\[\[(.*?)\]\]/g, '![Image](../../assets/$1)');
+  let processedContent = content.replace(/!\[\[(.*?)\]\]/g, '![Image](../../assets/$1)');
+
+  // Transform [[YYYY-MM-DD_xxxxx]] to [xxxxx](/diary/YYYY/MM/DD)
+  processedContent = processedContent.replace(/\[\[(\d{4})-(\d{2})-(\d{2})_(.*?)\]\]/g, (match, year, month, day, title) => {
+    return `[${title}](/diary/${year}/${month}/${day})`;
+  });
+
+  return processedContent;
 }
 
 async function copyFiles() {
