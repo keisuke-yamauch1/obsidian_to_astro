@@ -6,9 +6,9 @@ const sampleContent = fs.readFileSync(path.join(__dirname, 'sample.md'), 'utf8')
 
 const processedContent = processUrlsInContent(sampleContent);
 
-fs.writeFileSync(path.join(__dirname, 'output.md'), processedContent);
+fs.writeFileSync(path.join(__dirname, 'output.mdx'), processedContent);
 
-const expectedContent = fs.readFileSync(path.join(__dirname, 'expected.md'), 'utf8');
+const expectedContent = fs.readFileSync(path.join(__dirname, 'expected.mdx'), 'utf8');
 
 if (processedContent.trim() === expectedContent.trim()) {
   console.log('✅ Test passed! The processed content matches the expected output.');
