@@ -1,6 +1,7 @@
 require('dotenv').config();
 const fs = require('fs-extra');
 const path = require('path');
+const { processUrlsInContent } = require('./utils');
 
 // Get paths from environment variables
 const blogPath = process.env.BLOG_PATH;
@@ -61,7 +62,6 @@ function processTagsInFrontmatter(frontmatter) {
   return processedFrontmatter;
 }
 
-// Function to copy files
 // Function to process markdown content and convert Obsidian image syntax to Astro image syntax
 // Also adds a description based on the first 70 characters of the content (for blog entries only)
 function processMarkdownContent(content, addDescription = true) {
@@ -146,6 +146,9 @@ function processMarkdownContent(content, addDescription = true) {
     return `[${title}](/blog/${nonZeroPaddedNumber})`;
   });
 
+  // Process URLs in content
+  processedContent = processUrlsInContent(processedContent);
+
   return processedContent;
 }
 
@@ -170,14 +173,15 @@ async function copyFiles() {
     const blogFiles = fs.readdirSync(blogPath);
     for (const file of blogFiles) {
       if (file.endsWith('.md')) {
-        const destPath = path.join(outputContentPath, 'blog', file);
+        const mdxFileName = file.replace(/\.md$/, '.mdx');
+        const destPath = path.join(outputContentPath, 'blog', mdxFileName);
         // Read the file content
         const content = await fs.readFile(path.join(blogPath, file), 'utf8');
         // Process the content
         const processedContent = processMarkdownContent(content);
         // Write the processed content to the destination
         await fs.writeFile(destPath, processedContent);
-        console.log(`Copied and processed ${file} to ${path.join(outputContentPath, 'blog')}`);
+        console.log(`Copied and processed ${file} to ${destPath} (as .mdx)`);
       }
     }
 
@@ -186,14 +190,15 @@ async function copyFiles() {
     const diaryFiles = fs.readdirSync(diaryPath);
     for (const file of diaryFiles) {
       if (file.endsWith('.md')) {
-        const destPath = path.join(outputContentPath, 'diary', file);
+        const mdxFileName = file.replace(/\.md$/, '.mdx');
+        const destPath = path.join(outputContentPath, 'diary', mdxFileName);
         // Read the file content
         const content = await fs.readFile(path.join(diaryPath, file), 'utf8');
         // Process the content (don't add description for diary entries)
         const processedContent = processMarkdownContent(content, false);
         // Write the processed content to the destination
         await fs.writeFile(destPath, processedContent);
-        console.log(`Copied and processed ${file} to ${path.join(outputContentPath, 'diary')}`);
+        console.log(`Copied and processed ${file} to ${destPath} (as .mdx)`);
       }
     }
 
