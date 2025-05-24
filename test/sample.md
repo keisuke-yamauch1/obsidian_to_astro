@@ -25,6 +25,10 @@ https://vimeo.com/32001208
 ## 短縮YouTube URL  
   
 https://youtu.be/dQw4w9WgXcQ
+
+## 共有リンクYouTube
+
+https://youtu.be/dQw4w9WgXcQ?si=uRO2i5_Cj2hULHwu
   
 ## リンクプレビュー  
   

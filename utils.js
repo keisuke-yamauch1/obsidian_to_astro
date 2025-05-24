@@ -1,7 +1,7 @@
 // URL detection and conversion utilities
 
 // Regular expressions for detecting different types of URLs
-const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:&.*)?/g;
+const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[?&].*)?/g;
 const twitterRegex = /https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?/g;
 const vimeoRegex = /https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?.*)?/g;
 
