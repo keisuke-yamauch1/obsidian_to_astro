@@ -1,6 +1,7 @@
 require('dotenv').config();
 const fs = require('fs-extra');
 const path = require('path');
+const { processUrlsInContent } = require('./utils');
 
 // Get paths from environment variables
 const blogPath = process.env.BLOG_PATH;
@@ -61,7 +62,6 @@ function processTagsInFrontmatter(frontmatter) {
   return processedFrontmatter;
 }
 
-// Function to copy files
 // Function to process markdown content and convert Obsidian image syntax to Astro image syntax
 // Also adds a description based on the first 70 characters of the content (for blog entries only)
 function processMarkdownContent(content, addDescription = true) {
@@ -145,6 +145,9 @@ function processMarkdownContent(content, addDescription = true) {
     const nonZeroPaddedNumber = parseInt(number, 10);
     return `[${title}](/blog/${nonZeroPaddedNumber})`;
   });
+
+  // Process URLs in content
+  processedContent = processUrlsInContent(processedContent);
 
   return processedContent;
 }
