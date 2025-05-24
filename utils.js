@@ -4,7 +4,6 @@
 const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:&.*)?/g;
 const twitterRegex = /https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?/g;
 const vimeoRegex = /https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?.*)?/g;
-const linkRegex = /https?:\/\/(?!(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/|vimeo\.com\/))([^\s<]+)/g;
 
 // Function to add imports after frontmatter
 function addImportsAfterFrontmatter(content) {
@@ -12,25 +11,24 @@ function addImportsAfterFrontmatter(content) {
   if (!content.startsWith('---')) {
     return content;
   }
-  
+
   // Find the end of frontmatter
   const secondDashIndex = content.indexOf('---', 3);
   if (secondDashIndex === -1) {
     return content;
   }
-  
+
   // Split content into frontmatter and rest
   const frontmatter = content.substring(0, secondDashIndex + 3);
   const restContent = content.substring(secondDashIndex + 3);
-  
+
   // Add all imports after frontmatter (based on the example, we add all imports regardless of content)
   const imports = [
     'import { YouTube } from \'astro-embed\';  ',
     'import { Tweet } from \'astro-embed\';  ',
-    'import { Vimeo } from \'astro-embed\';  ',
-    'import { LinkPreview } from \'astro-embed\';  '
+    'import { Vimeo } from \'astro-embed\';  '
   ];
-  
+
   // Add imports after frontmatter with proper spacing
   return frontmatter + '\n' + imports.join('\n') + '\n' + restContent;
 }
@@ -56,24 +54,17 @@ function convertVimeoUrls(content) {
   });
 }
 
-// Function to convert general links to LinkPreview component tags
-function convertLinkUrls(content) {
-  return content.replace(linkRegex, (match) => {
-    return `<LinkPreview id="${match}" />`;
-  });
-}
 
 // Main function to process content
 function processUrlsInContent(content) {
   // First add imports after frontmatter
   let processedContent = addImportsAfterFrontmatter(content);
-  
+
   // Then convert URLs to component tags
   processedContent = convertYoutubeUrls(processedContent);
   processedContent = convertTwitterUrls(processedContent);
   processedContent = convertVimeoUrls(processedContent);
-  processedContent = convertLinkUrls(processedContent);
-  
+
   return processedContent;
 }
 
@@ -82,6 +73,5 @@ module.exports = {
   addImportsAfterFrontmatter,
   convertYoutubeUrls,
   convertTwitterUrls,
-  convertVimeoUrls,
-  convertLinkUrls
+  convertVimeoUrls
 };

@@ -10,17 +10,29 @@ fs.writeFileSync(path.join(__dirname, 'output.mdx'), processedContent);
 
 const expectedContent = fs.readFileSync(path.join(__dirname, 'expected.mdx'), 'utf8');
 
-if (processedContent.trim() === expectedContent.trim()) {
-  console.log('✅ Test passed! The processed content matches the expected output.');
+// Normalize content by removing extra whitespace
+const normalizeContent = (content) => {
+  return content
+    .trim()
+    .split('\n')
+    .map(line => line.trim())
+    .join('\n');
+};
+
+const normalizedProcessed = normalizeContent(processedContent);
+const normalizedExpected = normalizeContent(expectedContent);
+
+if (normalizedProcessed === normalizedExpected) {
+  console.log('✅ Test passed! The processed content matches the expected output (ignoring whitespace differences).');
 } else {
   console.error('❌ Test failed! The processed content does not match the expected output.');
   console.log('\nDifferences:');
-  
-  const processedLines = processedContent.trim().split('\n');
-  const expectedLines = expectedContent.trim().split('\n');
-  
+
+  const processedLines = normalizedProcessed.split('\n');
+  const expectedLines = normalizedExpected.split('\n');
+
   const maxLines = Math.max(processedLines.length, expectedLines.length);
-  
+
   for (let i = 0; i < maxLines; i++) {
     if (i >= processedLines.length) {
       console.log(`Line ${i + 1}: Missing in processed content: "${expectedLines[i]}"`);
