@@ -84,7 +84,8 @@ function runTest(sampleFileName, expectedFileName) {
 const testCases = [
   { sample: 'sample.md', expected: 'expected.mdx' },
   { sample: 'sample_tweet.md', expected: 'expected_tweet.mdx' },
-  { sample: 'sample_youtube.md', expected: 'expected_youtube.mdx' }
+  { sample: 'sample_youtube.md', expected: 'expected_youtube.mdx' },
+  { sample: 'sample_no_import.md', expected: 'expected_no_import.md' }
 ];
 
 // Reset the sample files to their original content

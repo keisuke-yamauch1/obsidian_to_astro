@@ -65,6 +65,17 @@ function convertVimeoUrls(content) {
 
 // Main function to process content
 function processUrlsInContent(content) {
+  // Check if content contains any URLs that need special handling
+  // Create new RegExp objects to avoid lastIndex issues with global regexes
+  const hasYoutubeUrl = new RegExp(youtubeRegex.source, 'g').test(content);
+  const hasTwitterUrl = new RegExp(twitterRegex.source, 'g').test(content);
+  const hasVimeoUrl = new RegExp(vimeoRegex.source, 'g').test(content);
+
+  // If no special URLs are found, return the content as is
+  if (!hasYoutubeUrl && !hasTwitterUrl && !hasVimeoUrl) {
+    return content;
+  }
+
   // First add imports after frontmatter
   let processedContent = addImportsAfterFrontmatter(content);
 
@@ -76,10 +87,19 @@ function processUrlsInContent(content) {
   return processedContent;
 }
 
+// Function to check if content needs to be converted to MDX
+function needsMdxConversion(content) {
+  // Create new RegExp objects to avoid lastIndex issues with global regexes
+  return new RegExp(youtubeRegex.source, 'g').test(content) || 
+         new RegExp(twitterRegex.source, 'g').test(content) || 
+         new RegExp(vimeoRegex.source, 'g').test(content);
+}
+
 module.exports = {
   processUrlsInContent,
   addImportsAfterFrontmatter,
   convertYoutubeUrls,
   convertTwitterUrls,
-  convertVimeoUrls
+  convertVimeoUrls,
+  needsMdxConversion
 };

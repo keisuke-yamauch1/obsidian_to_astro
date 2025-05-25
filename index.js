@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs-extra');
 const path = require('path');
-const { processUrlsInContent } = require('./utils');
+const { processUrlsInContent, needsMdxConversion } = require('./utils');
 
 // Get paths from environment variables
 const blogPath = process.env.BLOG_PATH;
@@ -173,15 +173,19 @@ async function copyFiles() {
     const blogFiles = fs.readdirSync(blogPath);
     for (const file of blogFiles) {
       if (file.endsWith('.md')) {
-        const mdxFileName = file.replace(/\.md$/, '.mdx');
-        const destPath = path.join(outputContentPath, 'blog', mdxFileName);
         // Read the file content
         const content = await fs.readFile(path.join(blogPath, file), 'utf8');
         // Process the content
         const processedContent = processMarkdownContent(content);
+
+        // Determine if the file needs to be converted to MDX
+        const needsMdx = needsMdxConversion(content);
+        const outputFileName = needsMdx ? file.replace(/\.md$/, '.mdx') : file;
+        const destPath = path.join(outputContentPath, 'blog', outputFileName);
+
         // Write the processed content to the destination
         await fs.writeFile(destPath, processedContent);
-        console.log(`Copied and processed ${file} to ${destPath} (as .mdx)`);
+        console.log(`Copied and processed ${file} to ${destPath} (as ${needsMdx ? '.mdx' : '.md'})`);
       }
     }
 
@@ -190,15 +194,19 @@ async function copyFiles() {
     const diaryFiles = fs.readdirSync(diaryPath);
     for (const file of diaryFiles) {
       if (file.endsWith('.md')) {
-        const mdxFileName = file.replace(/\.md$/, '.mdx');
-        const destPath = path.join(outputContentPath, 'diary', mdxFileName);
         // Read the file content
         const content = await fs.readFile(path.join(diaryPath, file), 'utf8');
         // Process the content (don't add description for diary entries)
         const processedContent = processMarkdownContent(content, false);
+
+        // Determine if the file needs to be converted to MDX
+        const needsMdx = needsMdxConversion(content);
+        const outputFileName = needsMdx ? file.replace(/\.md$/, '.mdx') : file;
+        const destPath = path.join(outputContentPath, 'diary', outputFileName);
+
         // Write the processed content to the destination
         await fs.writeFile(destPath, processedContent);
-        console.log(`Copied and processed ${file} to ${destPath} (as .mdx)`);
+        console.log(`Copied and processed ${file} to ${destPath} (as ${needsMdx ? '.mdx' : '.md'})`);
       }
     }
 
