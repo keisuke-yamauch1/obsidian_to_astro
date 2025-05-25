@@ -1,6 +1,6 @@
 # Obsidian to Astro
 
-ObsidianのコンテンツをAstroプロジェクト構造にコピーするスクリプトです。
+ObsidianのコンテンツをAstroプロジェクト構造にコピーするスクリプトです。Markdown形式のコンテンツを変換し、特定のURLを埋め込みコンポーネントに自動変換します。
 
 ## 機能
 
@@ -16,6 +16,18 @@ ObsidianのコンテンツをAstroプロジェクト構造にコピーするス�
 - Obsidian形式のブログリンク ([[00001_ブログタイトル]]) をAstro形式 ([ブログタイトル](/blog/1)) に変換
 - 画像ファイルは .png, .jpg, .jpeg, .gif 形式のみコピー
 - 必要な出力ディレクトリが存在しない場合は自動的に作成
+- YouTube、Twitter（X）の埋め込みURLを自動検出し、対応するastro-embedコンポーネントに変換
+- 埋め込みコンポーネントが必要なファイルは自動的に.mdx形式に変換
+- 必要なimport文を自動的にフロントマターの後に追加
+
+## 埋め込みコンポーネントの変換
+
+このスクリプトは以下のURLを検出し、対応するastro-embedコンポーネントに変換します：
+
+- YouTube: `https://www.youtube.com/watch?v=xxxx` → `<YouTube id="xxxx" playlabel="Play" />`
+- Twitter/X: `https://twitter.com/user/status/xxxx` → `<Tweet id="https://twitter.com/user/status/xxxx" />`
+
+これらのURLを含むファイルは自動的に.mdx形式に変換され、必要なimport文が追加されます。
 
 ## セットアップ
 
@@ -47,3 +59,13 @@ npm start
 - IMAGES_PATHから全ての画像ファイルをOUTPUT_IMAGES_PATHにコピー
 
 注意: 既に存在するファイルはスキップされ、上書きされません。コンソールにスキップされたファイルのログが表示されます。
+
+## テスト
+
+テストを実行するには:
+
+```
+npm test
+```
+
+これにより、test/ディレクトリ内のサンプルファイルを使用して変換機能がテストされます。
