@@ -3,7 +3,6 @@
 // Regular expressions for detecting different types of URLs
 const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[?&].*)?/g;
 const twitterRegex = /https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?/g;
-const vimeoRegex = /https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?.*)?/g;
 
 // Function to add imports after frontmatter
 function addImportsAfterFrontmatter(content) {
@@ -33,10 +32,6 @@ function addImportsAfterFrontmatter(content) {
     imports.push('import { Tweet } from \'astro-embed\';  ');
   }
 
-  if (vimeoRegex.test(content)) {
-    imports.push('import { Vimeo } from \'astro-embed\';  ');
-  }
-
   // Add imports after frontmatter with proper spacing
   return frontmatter + '\n' + imports.join('\n') + (imports.length > 0 ? '\n' : '') + restContent;
 }
@@ -55,12 +50,6 @@ function convertTwitterUrls(content) {
   });
 }
 
-// Function to convert Vimeo URLs to component tags
-function convertVimeoUrls(content) {
-  return content.replace(vimeoRegex, (match, videoId) => {
-    return `<Vimeo id="${videoId}" />`;
-  });
-}
 
 
 // Main function to process content
@@ -69,10 +58,9 @@ function processUrlsInContent(content) {
   // Create new RegExp objects to avoid lastIndex issues with global regexes
   const hasYoutubeUrl = new RegExp(youtubeRegex.source, 'g').test(content);
   const hasTwitterUrl = new RegExp(twitterRegex.source, 'g').test(content);
-  const hasVimeoUrl = new RegExp(vimeoRegex.source, 'g').test(content);
 
   // If no special URLs are found, return the content as is
-  if (!hasYoutubeUrl && !hasTwitterUrl && !hasVimeoUrl) {
+  if (!hasYoutubeUrl && !hasTwitterUrl) {
     return content;
   }
 
@@ -82,7 +70,6 @@ function processUrlsInContent(content) {
   // Then convert URLs to component tags
   processedContent = convertYoutubeUrls(processedContent);
   processedContent = convertTwitterUrls(processedContent);
-  processedContent = convertVimeoUrls(processedContent);
 
   return processedContent;
 }
@@ -91,8 +78,7 @@ function processUrlsInContent(content) {
 function needsMdxConversion(content) {
   // Create new RegExp objects to avoid lastIndex issues with global regexes
   return new RegExp(youtubeRegex.source, 'g').test(content) || 
-         new RegExp(twitterRegex.source, 'g').test(content) || 
-         new RegExp(vimeoRegex.source, 'g').test(content);
+         new RegExp(twitterRegex.source, 'g').test(content);
 }
 
 module.exports = {
@@ -100,6 +86,5 @@ module.exports = {
   addImportsAfterFrontmatter,
   convertYoutubeUrls,
   convertTwitterUrls,
-  convertVimeoUrls,
   needsMdxConversion
 };

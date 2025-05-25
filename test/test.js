@@ -29,9 +29,8 @@ function runTest(sampleFileName, expectedFileName) {
   // Check for URLs in the sample content
   const hasYouTube = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[?&].*)?/g.test(sampleContent);
   const hasTwitter = /https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?/g.test(sampleContent);
-  const hasVimeo = /https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?.*)?/g.test(sampleContent);
 
-  console.log(`URLs detected in ${sampleFileName}: YouTube: ${hasYouTube}, Twitter: ${hasTwitter}, Vimeo: ${hasVimeo}`);
+  console.log(`URLs detected in ${sampleFileName}: YouTube: ${hasYouTube}, Twitter: ${hasTwitter}`);
 
   const processedContent = processUrlsInContent(sampleContent);
 
