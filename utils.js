@@ -1,8 +1,8 @@
 // URL detection and conversion utilities
 
 // Regular expressions for detecting different types of URLs
-const youtubeRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[?&].*)?/g;
-const twitterRegex = /https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?/g;
+const youtubeRegex = /(?:\[)?https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[?&].*)?(?:\])?(?:\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)(?:[a-zA-Z0-9_-]+)(?:[?&].*)?\))?/g;
+const twitterRegex = /(?:\[)?https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?(?:\])?(?:\(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(?:\d+)(?:\?.*)?\))?/g;
 
 // Function to add imports after frontmatter
 function addImportsAfterFrontmatter(content) {
@@ -25,11 +25,11 @@ function addImportsAfterFrontmatter(content) {
   const imports = [];
 
   if (youtubeRegex.test(content)) {
-    imports.push('import { YouTube } from \'astro-embed\';  ');
+    imports.push('import { YouTube } from \'astro-embed\';');
   }
 
   if (twitterRegex.test(content)) {
-    imports.push('import { Tweet } from \'astro-embed\';  ');
+    imports.push('import { Tweet } from \'astro-embed\';');
   }
 
   // Add imports after frontmatter with proper spacing
@@ -39,14 +39,20 @@ function addImportsAfterFrontmatter(content) {
 // Function to convert YouTube URLs to component tags
 function convertYoutubeUrls(content) {
   return content.replace(youtubeRegex, (match, videoId) => {
+    // Extract video ID from the match
     return `<YouTube id="${videoId}" playlabel="Play" />`;
   });
 }
 
 // Function to convert Twitter URLs to component tags
 function convertTwitterUrls(content) {
-  return content.replace(twitterRegex, (match) => {
-    return `<Tweet id="${match}" />`;
+  return content.replace(twitterRegex, (match, tweetId) => {
+    // Extract the URL from the match
+    const urlMatch = match.match(/https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^\/]+)\/status\/(\d+)(?:\?.*)?/);
+    if (urlMatch) {
+      return `<Tweet id="${urlMatch[0]}" />`;
+    }
+    return match;
   });
 }
 

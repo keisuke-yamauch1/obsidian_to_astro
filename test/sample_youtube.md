@@ -13,3 +13,15 @@ tags: ["tech", "astro", "embed"]
 ## YouTube動画  
 
 https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+## 短縮YouTube URL
+
+https://youtu.be/dQw4w9WgXcQ
+
+## 共有リンクYouTube
+
+https://youtu.be/dQw4w9WgXcQ?si=uRO2i5_Cj2hULHwu
+
+## マークダウン形式
+
+[https://www.youtube.com/watch?v=dQw4w9WgXcQ](https://www.youtube.com/watch?v=dQw4w9WgXcQ)

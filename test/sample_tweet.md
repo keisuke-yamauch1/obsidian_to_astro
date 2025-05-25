@@ -13,4 +13,7 @@ tags: ["tech", "astro", "embed"]
 ## Twitter（X）投稿  
 
 https://x.com/kechiiin_/status/1926112141943136673
-  
+
+## マークダウン形式
+
+[https://x.com/kechiiin_/status/1926112141943136673](https://x.com/kechiiin_/status/1926112141943136673)
