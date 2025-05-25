@@ -22,15 +22,23 @@ function addImportsAfterFrontmatter(content) {
   const frontmatter = content.substring(0, secondDashIndex + 3);
   const restContent = content.substring(secondDashIndex + 3);
 
-  // Add all imports after frontmatter (based on the example, we add all imports regardless of content)
-  const imports = [
-    'import { YouTube } from \'astro-embed\';  ',
-    'import { Tweet } from \'astro-embed\';  ',
-    'import { Vimeo } from \'astro-embed\';  '
-  ];
+  // Check which imports are needed based on the content
+  const imports = [];
+
+  if (youtubeRegex.test(content)) {
+    imports.push('import { YouTube } from \'astro-embed\';  ');
+  }
+
+  if (twitterRegex.test(content)) {
+    imports.push('import { Tweet } from \'astro-embed\';  ');
+  }
+
+  if (vimeoRegex.test(content)) {
+    imports.push('import { Vimeo } from \'astro-embed\';  ');
+  }
 
   // Add imports after frontmatter with proper spacing
-  return frontmatter + '\n' + imports.join('\n') + '\n' + restContent;
+  return frontmatter + '\n' + imports.join('\n') + (imports.length > 0 ? '\n' : '') + restContent;
 }
 
 // Function to convert YouTube URLs to component tags
