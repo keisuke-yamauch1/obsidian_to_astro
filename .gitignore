@@ -34,3 +34,8 @@ yarn-error.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Test output files
+test/output*
+test/output_*.md
+test/output_*.mdx
