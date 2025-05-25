@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { processUrlsInContent } = require('../utils');
+const { processUrlsInContent, needsMdxConversion } = require('../utils');
 
 // Normalize content by removing extra whitespace
 const normalizeContent = (content) => {
