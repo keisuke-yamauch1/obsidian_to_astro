@@ -138,7 +138,7 @@ function processMarkdownContent(content, addDescription = true) {
 
   // Transform [[YYYY-MM-DD_xxxxx]] to [xxxxx](/diary/YYYY/MM/DD)
   processedContent = processedContent.replace(/\[\[(\d{4})-(\d{2})-(\d{2})_(.*?)\]\]/g, (match, year, month, day, title) => {
-    return `[${title}](/diary/${year}/${month}/${day})`;
+    return `[${year}-${month}-${day}](/diary/${year}/${month}/${day})`;
   });
 
   // Transform [[00001_ブログタイトル]] to [ブログタイトル](/blog/1)
