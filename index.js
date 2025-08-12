@@ -6,6 +6,7 @@ const { processUrlsInContent, needsMdxConversion } = require('./utils');
 // Get paths from environment variables
 const blogPath = process.env.BLOG_PATH;
 const diaryPath = process.env.DIARY_PATH;
+const emonicleePath = process.env.EMONMICLE_PATH;
 const imagesPath = process.env.IMAGES_PATH;
 const outputContentPath = process.env.OUTPUT_CONTENT_PATH;
 const outputImagesPath = process.env.OUTPUT_IMAGES_PATH;
@@ -13,6 +14,7 @@ const outputImagesPath = process.env.OUTPUT_IMAGES_PATH;
 // Create output directories if they don't exist
 fs.ensureDirSync(path.join(outputContentPath, 'blog'));
 fs.ensureDirSync(path.join(outputContentPath, 'diary'));
+fs.ensureDirSync(path.join(outputContentPath, 'emonicle'));
 fs.ensureDirSync(outputImagesPath);
 
 // Function to process tags in frontmatter to remove "astro_blog/" prefix
@@ -163,6 +165,10 @@ async function copyFiles() {
       console.error(`Diary path ${diaryPath} does not exist`);
       return;
     }
+    if (!fs.existsSync(emonicleePath)) {
+      console.error(`Emonicle path ${emonicleePath} does not exist`);
+      return;
+    }
     if (!fs.existsSync(imagesPath)) {
       console.error(`Images path ${imagesPath} does not exist`);
       return;
@@ -203,6 +209,27 @@ async function copyFiles() {
         const needsMdx = needsMdxConversion(content);
         const outputFileName = needsMdx ? file.replace(/\.md$/, '.mdx') : file;
         const destPath = path.join(outputContentPath, 'diary', outputFileName);
+
+        // Write the processed content to the destination
+        await fs.writeFile(destPath, processedContent);
+        console.log(`Copied and processed ${file} to ${destPath} (as ${needsMdx ? '.mdx' : '.md'})`);
+      }
+    }
+
+    // Copy emonicle files
+    console.log(`Copying emonicle files from ${emonicleePath} to ${path.join(outputContentPath, 'emonicle')}`);
+    const emonicleFiles = fs.readdirSync(emonicleePath);
+    for (const file of emonicleFiles) {
+      if (file.endsWith('.md')) {
+        // Read the file content
+        const content = await fs.readFile(path.join(emonicleePath, file), 'utf8');
+        // Process the content (don't add description for emonicle entries)
+        const processedContent = processMarkdownContent(content, false);
+
+        // Determine if the file needs to be converted to MDX
+        const needsMdx = needsMdxConversion(content);
+        const outputFileName = needsMdx ? file.replace(/\.md$/, '.mdx') : file;
+        const destPath = path.join(outputContentPath, 'emonicle', outputFileName);
 
         // Write the processed content to the destination
         await fs.writeFile(destPath, processedContent);

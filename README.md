@@ -6,6 +6,7 @@ ObsidianのコンテンツをAstroプロジェクト構造にコピーするス�
 
 - ObsidianのブログポストをAstroのコンテンツディレクトリにコピー
 - Obsidianの日記エントリをAstroのコンテンツディレクトリにコピー
+- Obsidianのエモニクル（emonicle）エントリをAstroのコンテンツディレクトリにコピー
 - Obsidianの画像をAstroの画像ディレクトリにコピー
 - .envファイルによるパス設定
 - 既に存在するファイルは移行の対象外（上書きされません）
@@ -40,6 +41,7 @@ ObsidianのコンテンツをAstroプロジェクト構造にコピーするス�
    ```
    BLOG_PATH=blog
    DIARY_PATH=diary
+   EMONMICLE_PATH=emonicle
    IMAGES_PATH=assets
    OUTPUT_CONTENT_PATH=src/content
    OUTPUT_IMAGES_PATH=src/assets
@@ -56,6 +58,7 @@ npm start
 これにより:
 - BLOG_PATHから全ての.mdファイルをOUTPUT_CONTENT_PATH/blogにコピー
 - DIARY_PATHから全ての.mdファイルをOUTPUT_CONTENT_PATH/diaryにコピー
+- EMONMICLE_PATHから全ての.mdファイルをOUTPUT_CONTENT_PATH/emonicleにコピー
 - IMAGES_PATHから全ての画像ファイルをOUTPUT_IMAGES_PATHにコピー
 
 注意: 既に存在するファイルはスキップされ、上書きされません。コンソールにスキップされたファイルのログが表示されます。
