@@ -3,6 +3,9 @@ const fs = require('fs-extra');
 const path = require('path');
 const { processUrlsInContent, needsMdxConversion } = require('./utils');
 
+// Allow specifying files via CLI arguments
+const args = process.argv.slice(2);
+
 // Get paths from environment variables
 const blogPath = process.env.BLOG_PATH;
 const diaryPath = process.env.DIARY_PATH;
@@ -10,6 +13,28 @@ const emonicleePath = process.env.EMONMICLE_PATH;
 const imagesPath = process.env.IMAGES_PATH;
 const outputContentPath = process.env.OUTPUT_CONTENT_PATH;
 const outputImagesPath = process.env.OUTPUT_IMAGES_PATH;
+
+// Validate required environment variables early
+const requiredEnv = {
+  BLOG_PATH: blogPath,
+  DIARY_PATH: diaryPath,
+  EMONMICLE_PATH: emonicleePath,
+  IMAGES_PATH: imagesPath,
+  OUTPUT_CONTENT_PATH: outputContentPath,
+  OUTPUT_IMAGES_PATH: outputImagesPath
+};
+
+let envError = false;
+Object.entries(requiredEnv).forEach(([key, value]) => {
+  if (!value) {
+    console.error(`Environment variable ${key} is not set.`);
+    envError = true;
+  }
+});
+
+if (envError) {
+  process.exit(1);
+}
 
 // Create output directories if they don't exist
 fs.ensureDirSync(path.join(outputContentPath, 'blog'));
@@ -257,5 +282,109 @@ async function copyFiles() {
   }
 }
 
-// Run the copy function
-copyFiles();
+async function copyMarkdownFile(sourcePath, destDir, addDescription) {
+  const content = await fs.readFile(sourcePath, 'utf8');
+  const processedContent = processMarkdownContent(content, addDescription);
+  const needsMdx = needsMdxConversion(content);
+  const outputFileName = needsMdx ? path.basename(sourcePath).replace(/\.md$/, '.mdx') : path.basename(sourcePath);
+  const destPath = path.join(outputContentPath, destDir, outputFileName);
+  await fs.writeFile(destPath, processedContent);
+  console.log(`Copied and processed ${sourcePath} to ${destPath} (as ${needsMdx ? '.mdx' : '.md'})`);
+}
+
+async function copyImageFile(sourcePath) {
+  const destPath = path.join(outputImagesPath, path.basename(sourcePath));
+  await fs.copy(sourcePath, destPath);
+  console.log(`Copied ${sourcePath} to ${destPath}`);
+}
+
+function isInside(targetPath, basePath) {
+  const normalizedBase = path.resolve(basePath);
+  const normalizedTarget = path.resolve(targetPath);
+  return normalizedTarget === normalizedBase || normalizedTarget.startsWith(normalizedBase + path.sep);
+}
+
+function validateSourceDirectories(requiredSources) {
+  let valid = true;
+  if (requiredSources.has('blog') && !fs.existsSync(blogPath)) {
+    console.error(`Blog path ${blogPath} does not exist`);
+    valid = false;
+  }
+  if (requiredSources.has('diary') && !fs.existsSync(diaryPath)) {
+    console.error(`Diary path ${diaryPath} does not exist`);
+    valid = false;
+  }
+  if (requiredSources.has('emonicle') && !fs.existsSync(emonicleePath)) {
+    console.error(`Emonicle path ${emonicleePath} does not exist`);
+    valid = false;
+  }
+  if (requiredSources.has('images') && !fs.existsSync(imagesPath)) {
+    console.error(`Images path ${imagesPath} does not exist`);
+    valid = false;
+  }
+  return valid;
+}
+
+async function copySpecifiedFiles(fileArgs) {
+  const requiredSources = new Set();
+  const resolvedBlog = path.resolve(blogPath);
+  const resolvedDiary = path.resolve(diaryPath);
+  const resolvedEmonicle = path.resolve(emonicleePath);
+  const resolvedImages = path.resolve(imagesPath);
+
+  for (const fileArg of fileArgs) {
+    const absolutePath = path.resolve(fileArg);
+    if (!fs.existsSync(absolutePath)) {
+      console.error(`Specified file ${absolutePath} does not exist. Skipping.`);
+      continue;
+    }
+
+    if (isInside(absolutePath, resolvedBlog)) {
+      requiredSources.add('blog');
+    } else if (isInside(absolutePath, resolvedDiary)) {
+      requiredSources.add('diary');
+    } else if (isInside(absolutePath, resolvedEmonicle)) {
+      requiredSources.add('emonicle');
+    } else if (isInside(absolutePath, resolvedImages)) {
+      requiredSources.add('images');
+    }
+  }
+
+  if (requiredSources.size === 0) {
+    console.error('No specified files matched BLOG_PATH, DIARY_PATH, EMONMICLE_PATH, or IMAGES_PATH.');
+    return;
+  }
+
+  if (!validateSourceDirectories(requiredSources)) {
+    return;
+  }
+
+  for (const fileArg of fileArgs) {
+    const absolutePath = path.resolve(fileArg);
+    if (!fs.existsSync(absolutePath)) {
+      continue;
+    }
+
+    if (isInside(absolutePath, resolvedBlog) && absolutePath.endsWith('.md')) {
+      await copyMarkdownFile(absolutePath, 'blog', true);
+    } else if (isInside(absolutePath, resolvedDiary) && absolutePath.endsWith('.md')) {
+      await copyMarkdownFile(absolutePath, 'diary', false);
+    } else if (isInside(absolutePath, resolvedEmonicle) && absolutePath.endsWith('.md')) {
+      await copyMarkdownFile(absolutePath, 'emonicle', false);
+    } else if (isInside(absolutePath, resolvedImages) && (absolutePath.endsWith('.png') || absolutePath.endsWith('.jpg') || absolutePath.endsWith('.jpeg') || absolutePath.endsWith('.gif'))) {
+      await copyImageFile(absolutePath);
+    } else {
+      console.warn(`Skipping ${absolutePath}: not under configured source paths or unsupported extension.`);
+    }
+  }
+}
+
+// Run the appropriate copy function
+if (args.length > 0) {
+  copySpecifiedFiles(args);
+} else {
+  const requiredSources = new Set(['blog', 'diary', 'emonicle', 'images']);
+  if (validateSourceDirectories(requiredSources)) {
+    copyFiles();
+  }
+}
